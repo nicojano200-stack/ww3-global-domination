@@ -43,8 +43,8 @@
     var pickMode = opts.pickMode;
     var onSelect = opts.onSelect || function(){};
     var vbX=0,vbY=0,vbW=W,vbH=H; // simple (no persisted zoom state in this minimal impl)
-    var svg = '<div class="real-map-wrap" style="position:relative;width:100%;aspect-ratio:2/1;min-height:320px;background:#081a33;border:1px solid #334155;border-radius:8px;overflow:hidden">' +
-      '<svg id="realSvg" viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" style="width:100%;height:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
+    var svg = '<div class="real-map-wrap" style="position:relative;width:100%;max-width:100%;aspect-ratio:2/1;max-height:calc(100vh - 280px);min-height:220px;background:#081a33;border:1px solid #334155;border-radius:8px;overflow:hidden">' +
+      '<svg id="realSvg" viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
       '<rect x="-500" y="-500" width="2000" height="1500" fill="#0a2342"/><g id="countries">';
     feats.forEach(function (f) {
       var rid = f.id;
