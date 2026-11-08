@@ -48,6 +48,20 @@
   // Ensure Antarctica is linked (already added) and connected; ensure every country has >=1 adjacency
   countries.forEach(function(c){ if(!c.adj.length && countries.length>1){ var other=countries.find(function(x){return x.id!==c.id;}); if(other) link(c.id, other.id); }});
 
+  // Stylized schematic positions (percent x/y on equirectangular stage) for map-like UI.
+  var anchors = { NA:[18,32], SA:[28,62], EU:[49,28], RU:[62,22], ME:[58,38], CA:[64,36], SA2:[70,46], EA:[78,34], OC:[86,66], NAF:[48,44], WAF:[46,54], CAF:[54,58], AN:[52,88] };
+  var gcount = {};
+  countries.forEach(function(c){ gcount[c.group]=(gcount[c.group]||0)+1; c._gi=gcount[c.group]-1; });
+  countries.forEach(function(c){
+    if(c.pos) return;
+    var a=anchors[c.group]||[50,50]; var n=gcount[c.group]||1; var i=c._gi||0;
+    var cols=Math.ceil(Math.sqrt(n)); var row=Math.floor(i/cols), col=i%cols;
+    c.pos = { x: Math.max(2, Math.min(98, a[0] + (col-(cols-1)/2)*3.2)), y: Math.max(4, Math.min(96, a[1] + (row-Math.floor((n-1)/cols)/2)*3.0)) };
+  });
+  // Manual nudges for key/large countries and Antarctica
+  var nudges = {US:[16,30],CA:[18,20],MX:[15,38],BR:[30,60],AR:[27,74],RU:[68,18],CN:[77,34],IN:[70,48],AU:[86,70],AQ:[50,92],GL:[34,14],SA:[58,44],EG:[54,42],ZA:[54,74],GB:[46,24],FR:[47,29],DE:[50,26],JP:[88,32],ID:[80,58]};
+  Object.keys(nudges).forEach(function(id){ if(byId[id]) byId[id].pos={x:nudges[id][0],y:nudges[id][1]}; });
+
   window.WW3Map = {
     regions: countries,
     get: function (id) { return byId[id] || null; },

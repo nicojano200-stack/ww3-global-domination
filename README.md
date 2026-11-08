@@ -16,7 +16,7 @@ A quick, playable browser prototype inspired by grand-strategy conflict games. *
 2. In GitHub: **Settings → Pages → Build and deployment**: source = *Deploy from a branch*, branch = `main` (or `master`) / root.
 3. Open the published Pages URL.
 
-## How to play (v0)
+## How to play (v1)
 
 1. **New Game** starts a match (you control one nation).
 2. Click a region to select it. Owned regions show your units/resources context.
