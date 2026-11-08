@@ -1,6 +1,6 @@
 # WW3: Global Domination (v0 prototype)
 
-A quick, playable browser prototype inspired by grand-strategy conflict games. **v0** is single-player, turn-based, with a simplified region map, basic resources, recruitment, movement/combat, and simple AI.
+A quick, playable browser prototype inspired by grand-strategy conflict games. **v1** is single-player, turn-based, with a **real-world country border map** (simplified Natural Earth data), real-country selection (incl. **Antarctica** as unclaimed/oil-rich), basic resources, recruitment, movement/combat, and simple AI. Adjacencies/combat remain simplified for prototype gameplay.
 
 > Prototype only — not affiliated with or a clone of Conflict of Nations.
 

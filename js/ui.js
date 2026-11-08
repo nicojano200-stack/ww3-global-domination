@@ -31,51 +31,64 @@
     + '<ellipse class="land" cx="500" cy="455" rx="220" ry="30"/>'
     + '</svg>';
 
+  function selectBySearch(q) {
+    if (!q) return false;
+    q = q.toLowerCase();
+    var r = WW3Map.regions.find(function(x){ return x.name.toLowerCase()===q || x.id.toLowerCase()===q; }) ||
+            WW3Map.regions.find(function(x){ return x.name.toLowerCase().indexOf(q)!==-1 || x.id.toLowerCase().indexOf(q)!==-1; });
+    return r || null;
+  }
+
   function renderWorldMap(opts) {
     opts = opts || {};
     var s = state();
-    var q = (mapFilter||'').toLowerCase();
-    var showAll = !!opts.showAllLabels;
-    var regions = WW3Map.regions.filter(function(r){
-      if (opts.pickMode && r.playable === false) return true; // show Antarctica
-      if (!q) return true;
-      return r.name.toLowerCase().indexOf(q)!==-1 || r.id.toLowerCase().indexOf(q)!==-1 || (r.group||'').toLowerCase().indexOf(q)!==-1;
-    });
-    var html = '<div class="map-toolbar"><input id="mapSearch" type="search" placeholder="Search all countries (map + list)..." value="'+esc(mapFilter)+'" />' +
-      '<span class="small">'+regions.length+'/'+WW3Map.regions.length+'</span></div>';
-    html += '<div class="map-stage" id="mapStage">' + WORLD_SVG;
-    regions.forEach(function(r){
-      var pos = r.pos || {x:50,y:50};
-      var cls = 'marker neutral';
-      var label = r.id;
-      var title = r.name;
-      if (s) {
-        cls = 'marker ' + ownerClass(r.id) + (selected===r.id?' selected':'');
-        if (ownerClass(r.id)==='player') label = r.id;
-      } else if (opts.pickMode) {
-        if (r.unclaimed) cls = 'marker neutral' + (selected===r.id?' selected':'');
-        else cls = 'marker ' + (pickedId===r.id?'player selected':'ai');
-      }
-      var showLabel = showAll || selected===r.id || pickedId===r.id || (q && r.name.toLowerCase().indexOf(q)!==-1);
-      if (r.unclaimed) showLabel = showLabel || selected===r.id || !!q;
-      html += '<button type="button" class="'+cls+'" data-rid="'+esc(r.id)+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="'+esc(title)+'">' + (showLabel?esc(r.id):'') + '</button>';
-    });
-    html += '</div><div class="small" style="margin-top:6px">Stylized strategic map (simplified). Click markers or search; Antarctica is unclaimed/oil-rich. Use the side panel for full actions.</div>';
+    var q = (mapFilter||'');
+    var html = '<div class="map-toolbar"><input id="mapSearch" type="search" placeholder="Search countries (real map)..." value="'+esc(q)+'" />' +
+      '<span class="small">'+WW3Map.regions.length+' countries</span></div><div id="mapHost"></div>';
     els.map.innerHTML = html;
-    var ms = $('mapSearch');
-    if (ms) ms.addEventListener('input', function(){ mapFilter = ms.value; var p=ms.selectionStart; renderWorldMap(opts); var ms2=$('mapSearch'); if(ms2){ms2.focus(); try{ms2.setSelectionRange(p,p);}catch(e){}} });
-    Array.prototype.forEach.call(els.map.querySelectorAll('[data-rid]'), function (btn) {
-      btn.addEventListener('click', function () {
-        var rid = btn.getAttribute('data-rid'); var r = WW3Map.get(rid);
-        if (opts.pickMode) {
-          selected = rid;
-          if (r && r.playable && !r.unclaimed) pickedId = rid;
-          showCountryPicker(true); // refresh sidebar/map state
-        } else {
-          selected = rid; render();
+    var host = $('mapHost');
+    var usedReal = false;
+    if (window.WW3RealMap && WW3RealMap.available()) {
+      usedReal = WW3RealMap.render(host, {
+        state: s, selected: selected, pickMode: !!opts.pickMode,
+        onSelect: function (rid) {
+          var r = WW3Map.get(rid);
+          if (opts.pickMode) { selected = rid; if (r && r.playable && !r.unclaimed) pickedId = rid; showCountryPicker(true); }
+          else { selected = rid; render(); }
         }
       });
+    }
+    if (!usedReal) {
+      // schematic fallback (markers)
+      var ql = q.toLowerCase();
+      var regions = WW3Map.regions.filter(function(r){ if(!ql) return true; return r.name.toLowerCase().indexOf(ql)!==-1 || r.id.toLowerCase().indexOf(ql)!==-1; });
+      var fh = '<div class="map-stage" id="mapStage">' + WORLD_SVG;
+      regions.forEach(function(r){
+        var pos = r.pos || {x:50,y:50};
+        var cls = 'marker neutral';
+        if (s) cls = 'marker ' + ownerClass(r.id) + (selected===r.id?' selected':'');
+        else if (opts.pickMode) cls = 'marker ' + ((r.unclaimed)?'neutral':(pickedId===r.id?'player':'ai')) + (selected===r.id?' selected':'');
+        var showLabel = selected===r.id || pickedId===r.id || (ql && r.name.toLowerCase().indexOf(ql)!==-1);
+        fh += '<button type="button" class="'+cls+'" data-rid="'+esc(r.id)+'" style="left:'+pos.x+'%;top:'+pos.y+'%" title="'+esc(r.name)+'">' + (showLabel?esc(r.id):'') + '</button>';
+      });
+      fh += '</div><div class="small" style="margin-top:6px">Schematic fallback map. Antarctica unclaimed (oil-rich).</div>';
+      host.innerHTML = fh;
+      Array.prototype.forEach.call(host.querySelectorAll('[data-rid]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var rid = btn.getAttribute('data-rid'); var r = WW3Map.get(rid);
+          if (opts.pickMode) { selected = rid; if (r && r.playable && !r.unclaimed) pickedId = rid; showCountryPicker(true); }
+          else { selected = rid; render(); }
+        });
+      });
+    }
+    var ms = $('mapSearch');
+    if (ms) ms.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        var r = selectBySearch(ms.value);
+        if (r) { mapFilter = ms.value; if (opts.pickMode) { selected=r.id; if(r.playable&&!r.unclaimed) pickedId=r.id; showCountryPicker(true);} else { selected=r.id; render(); } }
+      }
     });
+    if (ms) ms.addEventListener('input', function(){ mapFilter = ms.value; /* keep map stable; Enter selects */ });
   }
 
   function renderHUD() {
