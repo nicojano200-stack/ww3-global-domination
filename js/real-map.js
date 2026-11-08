@@ -2,9 +2,16 @@
   var W = 1000, H = 500;
   function project(lon, lat) { return [(lon + 180) * (W / 360), (90 - lat) * (H / 180)]; }
   function ringToPath(ring) {
-    var d = '';
-    for (var i = 0; i < ring.length; i++) { var p = project(ring[i][0], ring[i][1]); d += (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }
-    return d + 'Z';
+    var d = '', prev = null, prevLon = null;
+    for (var i = 0; i < ring.length; i++) {
+      var lon = ring[i][0], lat = ring[i][1];
+      var p = project(lon, lat);
+      var jump = prevLon != null && Math.abs(lon - prevLon) > 180;
+      if (i === 0 || jump) d += 'M' + p[0].toFixed(1) + ',' + p[1].toFixed(1);
+      else d += 'L' + p[0].toFixed(1) + ',' + p[1].toFixed(1);
+      prev = p; prevLon = lon;
+    }
+    return d ? (d + 'Z') : d;
   }
   function geomToPath(geom) {
     if (!geom) return '';
