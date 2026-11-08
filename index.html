@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WW3: Global Domination</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>WW3: Global Domination</h1>
+      <div class="sub">v0 prototype &mdash; turn-based strategy</div>
+    </div>
+    <div class="hud" id="hud">
+      <span id="resMoney">Money: -</span>
+      <span id="resManpower">Manpower: -</span>
+      <span id="resIndustry">Industry: -</span>
+      <span id="turnInfo">Turn: -</span>
+    </div>
+    <div class="controls">
+      <button id="newGameBtn" type="button">New Game</button>
+      <button id="endTurnBtn" type="button">End Turn</button>
+    </div>
+  </header>
+  <div id="banner" class="banner hidden"></div>
+  <main class="main">
+    <section class="map-panel">
+      <h2>World Map (simplified)</h2>
+      <div id="map" class="map" aria-label="Region map"></div>
+    </section>
+    <aside class="sidebar">
+      <h2>Selected Region</h2>
+      <div id="selection" class="selection">Click a region on the map.</div>
+      <div id="actions" class="actions"></div>
+    </aside>
+  </main>
+  <section class="log-panel">
+    <h2>Log</h2>
+    <div id="log" class="log"></div>
+  </section>
+  <script src="js/map.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/ui.js"></script>
+  <script>window.WW3UI && WW3UI.init();</script>
+</body>
+</html>
