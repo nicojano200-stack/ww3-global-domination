@@ -27,4 +27,4 @@ A quick, playable browser prototype inspired by grand-strategy conflict games. *
 
 ## Status
 
-Scaffold committed; core gameplay implemented in subsequent commits per plan (`docs/superpowers/plans/2026-11-08-ww3-global-domination-v0.md`).
+Playable **v0 prototype** implemented (simplified map, turn-based play, resources, recruit/move/attack, simple AI, win/lose). See `docs/superpowers/plans/2026-11-08-ww3-global-domination-v0.md`.
