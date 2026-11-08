@@ -28,9 +28,13 @@ button.danger { background: #b91c1c; }
 .map-toolbar input:focus { outline: 2px solid #3b82f6; border-color: #3b82f6; }
 .map-stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 2 / 1; max-height: calc(100vh - 280px); min-height: 220px; background: radial-gradient(ellipse at 50% 35%, #123a63 0%, #081a33 55%, #061225 100%); border: 1px solid #475569; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03); }
 .real-map-wrap { width: 100% !important; max-width: 100% !important; aspect-ratio: 2 / 1; max-height: calc(100vh - 280px) !important; min-height: 220px !important; height: auto !important; border-radius: 12px !important; border: 1px solid #475569 !important; box-shadow: 0 12px 34px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.03) !important; background: radial-gradient(ellipse at 50% 35%, #123a63 0%, #081a33 55%, #061225 100%) !important; }
+.real-map-wrap.rsm-like { background: #d9edf7 !important; border: 1px solid #c7d8e5 !important; box-shadow: 0 8px 24px rgba(15,23,42,.12) !important; }
 .real-map-wrap svg { filter: saturate(1.05) contrast(1.02); }
-.real-map-wrap path { transition: filter .12s ease, stroke-width .12s ease, opacity .12s ease; stroke-linejoin: round; }
+.real-map-wrap.rsm-like svg { filter: none; }
+.real-map-wrap path, .real-map-wrap .rsm-geography { transition: fill .12s ease, stroke-width .12s ease, opacity .12s ease, filter .12s ease; stroke-linejoin: round; outline: none; }
 .real-map-wrap path[data-rid]:hover { filter: brightness(1.18) saturate(1.1); stroke: #f8fafc !important; stroke-width: 1.2 !important; opacity: 1 !important; }
+.real-map-wrap.rsm-like .rsm-geography[data-rid]:hover { filter: brightness(0.97) saturate(1.05); stroke: #64748b !important; stroke-width: 0.9 !important; opacity: 1 !important; }
+.map-tooltip { position: absolute; pointer-events: none; z-index: 10; background: rgba(15,23,42,.92); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.2); white-space: nowrap; transform: translateY(-100%); }
 .real-map-wrap .small { backdrop-filter: blur(2px); }
 .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-svg .land { fill: #1f3b2b; stroke: #2f5a3f; stroke-width: 0.5; opacity: .95; }

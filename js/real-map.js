@@ -43,40 +43,54 @@
     var pickMode = opts.pickMode;
     var onSelect = opts.onSelect || function(){};
     var vbX=0,vbY=0,vbW=W,vbH=H; // simple (no persisted zoom state in this minimal impl)
-    var svg = '<div class="real-map-wrap" style="position:relative;width:100%;max-width:100%;aspect-ratio:2/1;max-height:calc(100vh - 280px);min-height:220px;background:#081a33;border:1px solid #334155;border-radius:8px;overflow:hidden">' +
-      '<svg id="realSvg" viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block" xmlns="http://www.w3.org/2000/svg">' +
-      '<rect x="-500" y="-500" width="2000" height="1500" fill="#0a2342"/><g id="countries">';
+    var svg = '<div class="real-map-wrap rsm-like" style="position:relative;width:100%;max-width:100%;aspect-ratio:2/1;max-height:calc(100vh - 280px);min-height:220px;background:#dceef7;border:1px solid #c2d7e6;border-radius:10px;overflow:hidden">' +
+      '<div id="mapTooltip" class="map-tooltip" style="display:none"></div>' +
+      '<svg id="realSvg" viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;background:#d9edf7" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="-500" y="-500" width="2000" height="1500" fill="#d9edf7"/><g id="countries">';
     feats.forEach(function (f) {
       var rid = f.id;
       var inGame = rid && WW3Map.get(rid);
-      var cls = 'c-neutral';
-      var fill = '#374151';
-      if (state && inGame) {
+      var fill = '#e6e9ee';
+      var inPlay = !!(state && inGame);
+      if (inPlay) {
         var o = state.owners[rid];
-        if (o === state.playerNationId) { cls='c-player'; fill='#2563eb'; }
-        else if (o === null || o === undefined) { cls='c-neutral'; fill='#6b7280'; }
-        else { cls='c-ai'; fill='#b91c1c'; }
+        if (o === state.playerNationId) fill = '#4f86d9';
+        else if (o === null || o === undefined) fill = '#94a3b8';
+        else fill = '#d96b6b';
       } else if (pickMode && inGame) {
-        if (WW3Map.get(rid).unclaimed) fill='#6b7280';
-        else fill='#475569';
-      } else if (!inGame) {
-        fill='#1f2937';
+        fill = (WW3Map.get(rid).unclaimed) ? '#94a3b8' : '#d7dde5';
+      } else if (inGame) {
+        fill = '#dfe5ec';
+      } else {
+        fill = '#eceff3';
       }
-      if (selected && rid === selected) { fill='#f59e0b'; }
-      var stroke = inGame ? '#0b1220' : '#0f172a';
-      var sw = (selected && rid === selected) ? 1.4 : (inGame ? 0.55 : 0.25);
-      var data = rid ? ' data-rid="'+rid+'" class="country'+(inGame?' in-game':'')+'"' : ' class="country"';
-      var op = inGame ? '0.96' : '0.45';
-      if (selected && rid === selected) { stroke = '#fde68a'; op = '1'; }
+      if (selected && rid === selected) fill = '#f4c95d';
+      var stroke = '#ffffff';
+      var sw = (selected && rid === selected) ? 1.1 : 0.45;
+      var data = rid ? ' data-rid="'+rid+'" data-name="'+((f.name||rid||'').replace(/"/g,'&quot;'))+'" class="rsm-geography'+(inGame?' in-game':'')+'"' : ' class="rsm-geography"';
+      var op = inGame ? '1' : '0.85';
       svg += '<path d="'+f.path+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="'+op+'"'+data+'><title>'+ (f.name||rid||'') +'</title></path>';
     });
     svg += '</g></svg>' +
-      '<div class="small" style="position:absolute;left:8px;bottom:6px;background:rgba(2,6,23,.55);color:#cbd5e1;padding:4px 8px;border-radius:6px;border:1px solid rgba(148,163,184,.2)">Real borders (simplified) · click a country · search + Enter</div></div>';
+      '<div class="small map-hint" style="position:absolute;left:8px;bottom:6px;background:rgba(255,255,255,.88);color:#334155;padding:4px 8px;border-radius:6px;border:1px solid rgba(148,163,184,.45)">Real borders (simplified) · click a country · search + Enter</div></div>';
     container.innerHTML = svg;
+    var tip = container.querySelector('#mapTooltip');
+    var wrap = container.querySelector('.real-map-wrap');
+    function showTip(ev, name) {
+      if (!tip || !wrap) return;
+      tip.textContent = name || '';
+      tip.style.display = name ? 'block' : 'none';
+      if (!name) return;
+      var r = wrap.getBoundingClientRect();
+      tip.style.left = (ev.clientX - r.left + 10) + 'px';
+      tip.style.top = (ev.clientY - r.top - 10) + 'px';
+    }
     var paths = container.querySelectorAll('path[data-rid]');
     for (var i=0;i<paths.length;i++) {
       paths[i].style.cursor='pointer';
       paths[i].addEventListener('click', function(ev){ var rid=ev.currentTarget.getAttribute('data-rid'); if(rid) onSelect(rid); });
+      paths[i].addEventListener('mousemove', function(ev){ var n=ev.currentTarget.getAttribute('data-name')||''; var rid=ev.currentTarget.getAttribute('data-rid'); var g=WW3Map.get(rid); showTip(ev, (g?g.name:n) || n); });
+      paths[i].addEventListener('mouseleave', function(){ showTip({}, ''); });
     }
     return true;
   }
