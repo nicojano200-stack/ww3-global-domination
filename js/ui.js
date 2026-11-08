@@ -114,23 +114,35 @@
 
   function showCountryPicker() {
     var playable = (WW3Map.playableIds ? WW3Map.playableIds() : WW3Map.regionIds()).map(function(id){ return WW3Map.get(id); }).filter(Boolean).sort(function(a,b){ return a.name.localeCompare(b.name); });
-    var html = '<div><strong>Choose your country</strong><div class="small">All countries available. Antarctica starts unclaimed (oil-rich, capturable).</div></div>' +
+    var pickedId = null;
+    var html = '<div><strong>Choose your country</strong><div class="small">Select a country, then press <strong>Play</strong>. Antarctica starts unclaimed (oil-rich, capturable).</div></div>' +
+      '<div id="pickedBox" class="small" style="margin-top:8px;padding:8px;border:1px solid #374151;border-radius:6px;background:#111827">No country selected.</div>' +
+      '<div class="row" style="margin-top:8px"><button id="playCountryBtn" type="button" disabled>Play</button></div>' +
       '<div style="margin-top:8px"><input id="countrySearch" type="search" placeholder="Search country..." style="width:100%;padding:8px;border-radius:6px;border:1px solid #374151;background:#111827;color:#e5e7eb" /></div>' +
-      '<div id="countryList" style="max-height:360px;overflow:auto;margin-top:8px"></div>';
+      '<div id="countryList" style="max-height:320px;overflow:auto;margin-top:8px"></div>';
     els.selection.innerHTML = html;
     els.actions.innerHTML = '';
+    function updatePicked() {
+      var c = pickedId ? WW3Map.get(pickedId) : null;
+      var box = $('pickedBox'); var btn = $('playCountryBtn');
+      if (c) { box.innerHTML = 'Selected: <strong>' + esc(c.name) + '</strong> <span class="small">('+esc(c.group||'')+' &middot; +$'+c.income.money+' M'+c.income.manpower+' I'+c.income.industry+')</span>'; btn.disabled = false; btn.textContent = 'Play as ' + c.name; }
+      else { box.textContent = 'No country selected.'; btn.disabled = true; btn.textContent = 'Play'; }
+    }
     function drawList(q) {
       q=(q||'').toLowerCase();
       var list = playable.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q)!==-1 || c.id.toLowerCase().indexOf(q)!==-1; }).slice(0,400);
       $('countryList').innerHTML = list.map(function(c){
-        return '<button type="button" class="region neutral" data-pick="'+esc(c.id)+'" style="width:100%;margin-bottom:6px"><div class="name">'+esc(c.name)+'</div><div class="meta small">'+esc(c.group||'')+' &middot; +$'+c.income.money+' M'+c.income.manpower+' I'+c.income.industry+'</div></button>';
+        var sel = c.id === pickedId ? ' selected player' : ' neutral';
+        return '<button type="button" class="region'+sel+'" data-pick="'+esc(c.id)+'" style="width:100%;margin-bottom:6px"><div class="name">'+esc(c.name)+'</div><div class="meta small">'+esc(c.group||'')+' &middot; +$'+c.income.money+' M'+c.income.manpower+' I'+c.income.industry+'</div></button>';
       }).join('') || '<div class="small">No matches.</div>';
       Array.prototype.forEach.call($('countryList').querySelectorAll('[data-pick]'), function(b){
-        b.addEventListener('click', function(){ startGame(b.getAttribute('data-pick')); });
+        b.addEventListener('click', function(){ pickedId = b.getAttribute('data-pick'); drawList($('countrySearch')?$('countrySearch').value:''); updatePicked(); });
       });
     }
+    $('playCountryBtn').addEventListener('click', function(){ if (pickedId) startGame(pickedId); });
     drawList('');
     $('countrySearch').addEventListener('input', function(){ drawList(this.value); });
+    updatePicked();
   }
 
   function startGame(playerId) {
