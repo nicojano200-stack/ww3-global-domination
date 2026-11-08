@@ -63,14 +63,15 @@
         fill='#1f2937';
       }
       if (selected && rid === selected) { fill='#f59e0b'; }
-      var stroke = inGame ? '#111827' : '#0f172a';
-      var sw = inGame ? 0.5 : 0.3;
-      var data = rid ? ' data-rid="'+rid+'"' : '';
-      var op = inGame ? '1' : '0.55';
-      svg += '<path d="'+f.path+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="'+op+'"'+data+'><title>'+ (f.name||rid||'') + (inGame?'':'') +'</title></path>';
+      var stroke = inGame ? '#0b1220' : '#0f172a';
+      var sw = (selected && rid === selected) ? 1.4 : (inGame ? 0.55 : 0.25);
+      var data = rid ? ' data-rid="'+rid+'" class="country'+(inGame?' in-game':'')+'"' : ' class="country"';
+      var op = inGame ? '0.96' : '0.45';
+      if (selected && rid === selected) { stroke = '#fde68a'; op = '1'; }
+      svg += '<path d="'+f.path+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="'+op+'"'+data+'><title>'+ (f.name||rid||'') +'</title></path>';
     });
     svg += '</g></svg>' +
-      '<div class="small" style="position:absolute;left:8px;bottom:6px;background:rgba(0,0,0,.35);padding:2px 6px;border-radius:4px">Real country borders (simplified). Click a country. Search still finds all roster countries.</div></div>';
+      '<div class="small" style="position:absolute;left:8px;bottom:6px;background:rgba(2,6,23,.55);color:#cbd5e1;padding:4px 8px;border-radius:6px;border:1px solid rgba(148,163,184,.2)">Real borders (simplified) · click a country · search + Enter</div></div>';
     container.innerHTML = svg;
     var paths = container.querySelectorAll('path[data-rid]');
     for (var i=0;i<paths.length;i++) {
