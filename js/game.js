@@ -47,7 +47,8 @@
 
   function newGame(playerRegionId) {
     var ids = WW3Map.regionIds();
-    var player = playerRegionId && ids.indexOf(playerRegionId) !== -1 ? playerRegionId : 'na_e';
+    var playable = WW3Map.playableIds ? WW3Map.playableIds() : ids;
+    var player = playerRegionId && playable.indexOf(playerRegionId) !== -1 ? playerRegionId : (playable.indexOf('US') !== -1 ? 'US' : playable[0]);
     var state = {
       turn: 1,
       playerNationId: player,
@@ -58,14 +59,20 @@
       winner: null
     };
     ids.forEach(function (rid) {
-      state.owners[rid] = rid; // each starts self-owned
+      var r = WW3Map.get(rid);
+      var unclaimed = r && r.unclaimed;
+      state.owners[rid] = unclaimed ? null : rid; // unclaimed (e.g. Antarctica) starts ownerless
       state.units[rid] = emptyUnits();
-      state.nations[rid] = { resources: cloneResources(START_RES), alive: true };
+      if (!unclaimed) state.nations[rid] = { resources: cloneResources(START_RES), alive: true };
     });
-    // Starting forces: everyone gets 2 infantry at home; player gets a small boost.
-    ids.forEach(function (rid) { state.units[rid].infantry = 2; });
-    state.units[player].infantry = 4; state.units[player].armor = 1;
-    log(state, 'New game started. You control ' + regionName(player) + '.');
+    // Starting forces: playable nations get 1-2 infantry; player gets boost. Unclaimed has none.
+    ids.forEach(function (rid) {
+      var r = WW3Map.get(rid);
+      if (r && r.unclaimed) return;
+      state.units[rid].infantry = 1;
+    });
+    if (state.units[player]) { state.units[player].infantry = 4; state.units[player].armor = 1; }
+    log(state, 'New game started. You control ' + regionName(player) + '. Antarctica is unclaimed (oil-rich).');
     return state;
   }
 
